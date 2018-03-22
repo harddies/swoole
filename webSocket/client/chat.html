@@ -87,6 +87,7 @@
                     else
                     {
                         login_name = data.msg;
+                        $('#login').html('您好！' + login_name);
                         link();
                     }
                 },
@@ -98,16 +99,47 @@
     });
 
     function link () {
-        ws = new WebSocket("ws://192.168.1.89:9501");//连接服务器
+        ws = new WebSocket("ws://192.168.1.6:9501/?nick_name="+login_name);//连接服务器
         ws.onopen = function(event){
-            console.log(event);
-            alert('连接了');
+            //console.log(event);
+            alert('您进入了聊天室');
+            ws.send(login_name);
         };
         ws.onmessage = function (event) {
-            var msg = "<p>"+event.data+"</p>";
-            $("#msgArea").append(msg);
+            console.log(event);
+            var data = JSON.parse(event.data);
+            var now;
+            switch (data.type)
+            {
+                case 1:
+                    now = new Date();
+                    var msg = $('#userMsg').val();
+                    $('#msgArea').html("<span style='font-size: 18px; color: red;'>" + login_name + "</span>  <span style='font-size: 12px;'>" + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + msg + "</span><br>");
+
+                    break;
+
+                case 3:
+                    now = new Date();
+                    $('#msgArea').html("<span style='font-size: 18px; color: red;'>" + login_name + "</span>  <span style='font-size: 12px;'>" + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + data.msg + "<br>");
+
+                    break;
+                case 4:
+                    var html = "<div style='font-size: 28px;font-weight: bold;'>当前在线人数：" + data.qty + "</div>";
+                    for (var i in data.users)
+                    {
+                        html += data.users[i] + "<br>";
+                    }
+                    $('#currentUsers').html(html);
+
+                    break;
+
+                default:
+                    break;
+            }
         };
-        ws.onclose = function(event){alert("已经与服务器断开连接\r\n当前连接状态："+this.readyState);};
+        ws.onclose = function(event){
+            alert("已经与服务器断开连接\r\n当前连接状态："+this.readyState);
+        };
 
         ws.onerror = function(event){alert("WebSocket异常！");};
     }

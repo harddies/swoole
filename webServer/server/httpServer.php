@@ -22,9 +22,9 @@ $http->on('request', function (swoole_http_request $request, swoole_http_respons
         $nick_name = $request->post['nick_name'];
         $password = md5($request->post['nick_name']);
 
-        $db_config = require_once $dirName . '/../../config/db.php';
+        require_once $dirName . '/../../common/pdo_mysql.php';
 
-        $pdo = new PDO($db_config['mysql']['connectionString'], $db_config['mysql']['username'], $db_config['mysql']['password'], ['charset' => 'utf8']);
+        $pdo = \common\pdo_mysql::db();
         $sql = 'SELECT * FROM swl_user WHERE nick_name = :nick_name AND password = :password';
         $stat = $pdo->prepare($sql);
         $stat->execute(
