@@ -5,18 +5,24 @@
     <meta charset="utf-8">
     <style>
         *{
-            margin:0px;
-            padding:0px;
+            margin:0;
+            padding:0;
         }
     </style>
 </head>
 
 <body>
-<div style="margin-left:400px">
-    <div style="border:1px solid;width: 600px;height: 500px;">
+<div style="float: left; margin-right: 20px;">
+    <div style="border:1px solid #ccc;width: 200px;height: 500px; margin-bottom: 10px;">
+        <div id="currentUsers" style="width:100%;height: 100%;text-align:start;resize: none;font-family: 微软雅黑;font-size: 20px;overflow-y: scroll"></div>
+    </div>
+</div>
+
+<div style="float: left; margin-right: 20px;"">
+    <div style="border:1px solid #ccc;width: 600px;height: 500px; margin-bottom: 10px;">
         <div id="msgArea" style="width:100%;height: 100%;text-align:start;resize: none;font-family: 微软雅黑;font-size: 20px;overflow-y: scroll"></div>
     </div>
-    <div style="border:1px solid;width: 600px;height: 200px;">
+    <div style="border:1px solid #ccc;width: 600px;height: 200px;">
         <div style="width:100%;height: 100%;">
             <textarea id="userMsg" style="width:100%;height: 100%;text-align:start;resize: none;font-family: 微软雅黑;font-size: 20px;"></textarea>
         </div>
@@ -25,15 +31,71 @@
         <button style="float: right;" onclick="sendMsg()">发送</button>
     </div>
 </div>
+
+<div style="float: left; margin-right: 20px;">
+    <div style="border:1px solid #ccc;width: 200px;height: 480px; padding: 10px;">
+        <div id="login" style="width:100%;height: 100%;text-align:start;resize: none;font-family: 微软雅黑;font-size: 20px;overflow-y: scroll">
+            <div>
+                <label>昵称：</label>
+                <input type="text" value="" name="nick_name">
+            </div>
+            <div>
+                <label>密码：</label>
+                <input type="password" value="" name="password">
+            </div>
+            <div>
+                <input value="登录" id="submitBtn" type="button">
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 
 </html>
 <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
 <script>
-    var ws;
+    var ws, login_name = '';
     $(function(){
-        link();
-    })
+        //link();
+
+        $("textarea").keypress(function(event){
+            if(event.keyCode == 13)
+                sendMsg();
+        });
+
+        $('#submitBtn').click(function () {
+            var nick_name = $('input[name="nick_name"]').val().trim();
+            var password = $('input[name="password"]').val().trim();
+
+            if (nick_name == '' || password == '')
+            {
+                alert('请输入用户名密码');
+                return false;
+            }
+
+            $.ajax({
+                'url': './',
+                'data': {act: 'login', nick_name: nick_name, password: password},
+                'type': 'post',
+                'dataType': 'json',
+                'timeout': 20000,
+                'success': function (data){
+                    if(data.error)
+                    {
+                        alert(data.msg);
+                    }
+                    else
+                    {
+                        login_name = data.msg;
+                        link();
+                    }
+                },
+                'error': function () {
+                    alert('请求失败');
+                }
+            })
+        });
+    });
 
     function link () {
         ws = new WebSocket("ws://192.168.1.89:9501");//连接服务器
@@ -44,13 +106,19 @@
         ws.onmessage = function (event) {
             var msg = "<p>"+event.data+"</p>";
             $("#msgArea").append(msg);
-        }
+        };
         ws.onclose = function(event){alert("已经与服务器断开连接\r\n当前连接状态："+this.readyState);};
 
         ws.onerror = function(event){alert("WebSocket异常！");};
     }
 
     function sendMsg(){
+        if (login_name == '')
+        {
+            alert('请先登录');
+            return false;
+        }
+
         var msg = $("#userMsg").val();
         ws.send(msg);
         $("#userMsg").val('');
