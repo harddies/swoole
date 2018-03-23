@@ -9,9 +9,9 @@
 
 $http = new swoole_http_server("0.0.0.0", 9502);
 
-$http->set([
+/*$http->set([
     'daemonize' => 1
-]);
+]);*/
 
 $http->on('request', function (swoole_http_request $request, swoole_http_response $response) {
     $dirName = dirname(__FILE__);
