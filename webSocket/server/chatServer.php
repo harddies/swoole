@@ -1,7 +1,8 @@
 <?php
+define('MSG_CHAT_TYPE', 1);
+define('MSG_NOTICE_TYPE', 2);
 
 $server = new swoole_websocket_server("0.0.0.0", 9501);
-
 
 $server->on('open', function (swoole_websocket_server $server, swoole_http_request $request) {
     echo "server: handshake success with fd{$request->fd}\n";
@@ -19,7 +20,7 @@ $server->on('open', function (swoole_websocket_server $server, swoole_http_reque
     $sql = 'SELECT * FROM swl_user where fd > 0';
     $stat = $pdo->query($sql);
     $userList = [];
-    $i = 1;
+    $i = 0;
 
     foreach ($stat->fetchAll(PDO::FETCH_ASSOC) as $key => $row)
     {
@@ -29,15 +30,26 @@ $server->on('open', function (swoole_websocket_server $server, swoole_http_reque
     //通知所有用户 当前在线用户列表
     foreach ($server->connections as $fd)
     {
-        $server->push($fd, json_encode(['type' => 4, 'qty' => $i, 'users' => $userList]));
+        $server->push($fd, json_encode(['type' => MSG_NOTICE_TYPE, 'qty' => $i, 'users' => $userList]));
     }
 });
 
 $server->on('message', function (swoole_websocket_server $server, swoole_websocket_frame $frame) {
+    $dirName = dirname(__FILE__);
+    require_once $dirName . '/../../common/pdo_mysql.php';
+    $pdo = \common\pdo_mysql::db();
+    $sql = 'SELECT * FROM swl_user where fd = :fd';
+    $stat = $pdo->prepare($sql);
+    $stat->execute([':fd' => $frame->fd]);
+    $row = $stat->fetch(PDO::FETCH_ASSOC);
+    if (empty($row))
+        $nick_name = '匿名用户';
+    else
+        $nick_name = $row['nick_name'];
+
     foreach($server->connections as $key => $fd)
     {
-        $user_message = $frame->data;
-        $server->push($fd, json_encode(['type' => 3, 'msg' => $user_message]));
+        $server->push($fd, json_encode(['type' => MSG_CHAT_TYPE, 'nick_name' => $nick_name, 'msg' => $frame->data]));
     }
 
 });
@@ -56,7 +68,7 @@ $server->on('close', function (swoole_websocket_server $server, $fd) {
         echo "fd{$fd} unbind failed\n";
     }
 
-    $sql = 'SELECT * FROM swl_user where fd > 0';
+    $sql = 'SELECT * FROM swl_user where fd > 0 ORDER BY fd ASC';
     $stat = $pdo->query($sql);
     $userList = [];
     $i = 1;
@@ -69,7 +81,7 @@ $server->on('close', function (swoole_websocket_server $server, $fd) {
     //通知所有用户 当前在线用户列表
     foreach ($server->connections as $fd)
     {
-        $server->push($fd, json_encode(['type' => 4, 'qty' => $i, 'users' => $userList]));
+        $server->push($fd, json_encode(['type' => MSG_NOTICE_TYPE, 'qty' => $i, 'users' => $userList]));
     }
 });
 
