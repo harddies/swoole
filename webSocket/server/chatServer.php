@@ -2,7 +2,7 @@
 define('MSG_CHAT_TYPE', 1);
 define('MSG_NOTICE_TYPE', 2);
 
-$server = new swoole_websocket_server("0.0.0.0", 9501);
+$server = new swoole_websocket_server("0.0.0.0", 11001);
 
 /*$server->set([
     'daemonize' => 1
