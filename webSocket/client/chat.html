@@ -123,7 +123,7 @@
                         "</span><br>";
 
                     $('#msgArea').append(html);
-                    $('#msgArea').scrollTo($('#msgArea').scrollHeight);
+                    $('#msgArea').scrollTo($('#msgArea').height());
 
                     break;
 
@@ -160,6 +160,6 @@
         var msg = $("#userMsg").val();
         ws.send(msg);
         $("#userMsg").val('');
-        $('#msgArea').scrollTo($('#msgArea').scrollHeight);
+        $('#msgArea').scrollTop($('#msgArea').height());
     }
 </script>
