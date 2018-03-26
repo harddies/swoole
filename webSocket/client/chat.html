@@ -28,7 +28,7 @@
         </div>
     </div>
     <div style="border:1px solid;width: 600px;height: 25px;">
-        <button style="float: right;" onclick="sendMsg()">发送</button>
+        <button style="float: right;" onclick="sendMsg()">发送 (Ctrl + Enter)</button>
     </div>
 </div>
 
@@ -58,11 +58,10 @@
     $(function(){
         //link();
 
-        $("textarea").keypress(function(event){
-            if(event.keyCode == 13)
+        $("textarea").keydown(function(event){
+            if(event.keyCode == 13 && event.ctrlKey)
             {
                 sendMsg();
-                $("#userMsg").val('');
             }
         });
 
@@ -123,7 +122,7 @@
                         "</span><br>";
 
                     $('#msgArea').append(html);
-                    $('#msgArea').scrollTo($('#msgArea').height());
+                    $('#msgArea').scrollTop($('#msgArea').height());
 
                     break;
 
