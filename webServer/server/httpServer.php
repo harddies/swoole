@@ -68,7 +68,7 @@ $http->on('request', function (swoole_http_request $request, swoole_http_respons
     }
     else
     {
-        $chatConfig = require_once dirname(__FILE__) . '/../../webSocket/config/server.php';
+        $chatConfig = require dirname(__FILE__) . '/../../webSocket/config/server.php';
         $chatServerAddress = $chatConfig['chatServerAddress'];
 
         $returnHTML = file_get_contents($dirName . '/../../webSocket/client/chat.html');
