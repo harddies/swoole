@@ -61,6 +61,8 @@
         $("textarea").keypress(function(event){
             if(event.keyCode == 13)
                 sendMsg();
+
+            $("#userMsg").val('');
         });
 
         $('#submitBtn').click(function () {
