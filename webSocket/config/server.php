@@ -1,4 +1,4 @@
 <?php
 return [
-    'chatServerAddress' => '39.106.56.177:11001'
+    'chatServerAddress' => '47.98.115.197:11001'
 ];
